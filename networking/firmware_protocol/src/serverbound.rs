@@ -3,6 +3,7 @@ use deku::prelude::*;
 
 use crate::{SlimeQuaternion, SlimeString};
 
+// Packets 1 (Rotation), 2 (Gyro), 6 (RawCalibrationData), 7 (CalibrationFinished), 13 (Tap), 14[?] (Error), 18 (MagnetometerAccuracy), 22 (FeatureFlags), 100 aren't really used
 #[derive(Debug, PartialEq, DekuRead, DekuWrite)]
 #[deku(ctx = "_: deku::ctx::Endian, tag: u32", id = "tag", endian = "big")]
 #[non_exhaustive]
@@ -26,8 +27,28 @@ pub enum SbPacket {
 		vector: (f32, f32, f32),
 		sensor_id: u8,
 	},
+	#[deku(id = "7")]
+	CalibrationFinished {
+		sensor_id: u8,
+		data_type: u8,
+	},
 	#[deku(id = "10")]
 	Ping { challenge: [u8; 4] },
+	#[deku(id = "12")]
+	Battery {
+		voltage: f32,
+		current: f32,
+	},
+	#[deku(id = "13")]
+	Tap {
+		sensor_id: u8,
+		value: u8,
+	},
+	#[deku(id = "14")]
+	Error {
+		sensor_id: u8,
+		reason: u8,
+	},
 	#[deku(id = "15")]
 	SensorInfo {
 		sensor_id: u8,
@@ -41,8 +62,33 @@ pub enum SbPacket {
 		quat: SlimeQuaternion,
 		calibration_info: u8,
 	},
+	#[deku(id = "18")]
+	MagAccuracy {
+		sensor_id: u8,
+		accuracy: f32,
+	},
+	#[deku(id = "19")]
+	SignalStrength {
+		sensor_id: u8,
+		strength: i8,
+	},
+	#[deku(id = "20")]
+	Temperature {
+		sensor_id: u8,
+		temperature: f32,
+	},
 	#[deku(id = "21")]
-	UserAction { action: ActionType },
+	UserAction { 
+		action: ActionType
+	},
+	// #[deku(id = "22")]
+	// FeatureFlags {
+	// 	flags: Vec<_>,
+	// }
+	//#[deku(id = "100")]
+	// Bundle {
+	// 	Packets: Vec<SbPacket>,
+	// },
 }
 
 #[derive(Debug, PartialEq, Eq, DekuRead, DekuWrite)]
@@ -161,7 +207,7 @@ pub enum McuType {
 	#[deku(id = "5")]
 	OwoTrackIos,
 	#[deku(id = "6")]
-	Esp32_C3,
+	Esp32C3,
 	#[deku(id = "7")]
 	Mocopi,
 	#[deku(id = "8")]
