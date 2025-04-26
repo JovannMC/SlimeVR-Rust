@@ -37,7 +37,7 @@ pub enum SbPacket {
 	#[deku(id = "12")]
 	Battery {
 		voltage: f32,
-		current: f32,
+		percentage: f32,
 	},
 	#[deku(id = "13")]
 	Tap {
